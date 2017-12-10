@@ -55,7 +55,7 @@ class iterMul (val op_sz: Int) extends Module {
   val partial = Reg(UInt(op_sz.W))
 
 
-  // state logic
+  // circuitry
   switch(state) {
 
     is(s_Ready) {
@@ -71,7 +71,9 @@ class iterMul (val op_sz: Int) extends Module {
     is(s_Calc) {
       io.deq.ready := false.B
       io.enq.valid := false.B
-      //mux_sel      := true.B  // choose shifted vals
+      partial      := Mux(b(0), partial + a, partial)
+      a            := a << 1
+      b            := b >> 1
       when (b.orR === 0.U) {state := s_Done}
       .otherwise           {state := s_Calc}
     }
@@ -79,16 +81,14 @@ class iterMul (val op_sz: Int) extends Module {
     is(s_Done) {
       io.deq.ready := false.B
       io.enq.valid := true.B
-      //mux_sel      := true.B // don't choose inputs
+      partial      := partial
+      a            := 0.U
+      b            := 0.U
       when (io.enq.ready) {state := s_Ready}
       .otherwise          {state := s_Done}
     }
 
   }
 
-  // datapath
-  //val a       = Reg(next = Mux(mux_sel, a << 1, io.deq.bits.in1))
-  //val b       = Reg(next = Mux(mux_sel, b >> 1, io,deq.bits.in2))
-  //val partial = Reg(next = Mux(mux_sel, Mux(b(0), partial + a, partial), 0.U)) 
   io.enq.bits.product := partial
 }

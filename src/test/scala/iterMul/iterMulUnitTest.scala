@@ -2,21 +2,29 @@
 package iterMul
 
 import chisel3._
-import chisel3.iotesters.{ChiselFlatSpec, OrderedDecoupledHWIOTester}
+import chisel3.iotesters.{ChiselFlatSpec, Driver, PeekPokeTester}
 
-class iterMulUnitTest extends OrderedDecoupledHWIOTester {
- 
-  val device_under_test = Module(new iterMul(32))  // don't like this here, prefer in flat spec
-  val c = device_under_test
+class iterMulUnitTest(c: iterMul) extends PeekPokeTester(c) {
 
-  for (i <- 0 until 4) {
-    val r_in1 = rnd.nextInt(c.op_sz)
-    val r_in2 = rnd.nextInt(c.op_sz)
+  for (i <- 0 until 4){
+    val r1     = rnd.nextInt(c.op_sz)
+    val r2     = rnd.nextInt(c.op_sz)
+    var cycles = 1
+
+    poke(c.io.deq.bits.in1, r1)
+    poke(c.io.deq.bits.in2, r2)
+    poke(c.io.deq.valid, 1)
+    poke(c.io.enq.ready, 0)
+    step(1)
+    poke(c.io.deq.valid, 0)
+    poke(c.io.enq.ready, 1)
     
-    println("hello from loop")
-
-    inputEvent(c.io.deq.bits.in1 -> r_in1, c.io.deq.bits.in2 -> r_in1)
-    //outputEvent(c.io.enq.bits.product -> r_in1 * r_in2)
+    while(peek(c.io.enq.valid) == BigInt(0)) {
+      step(1)
+      cycles += 1
+    }
+    expect(c.io.enq.bits.product, r1 * r2)
+    println(s"Multiplying $r1 and $r2 took $cycles cycles")
   }
 }
 
