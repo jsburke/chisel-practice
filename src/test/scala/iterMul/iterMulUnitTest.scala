@@ -24,6 +24,7 @@ class iterMulUnitTest(c: iterMul) extends PeekPokeTester(c) {
       cycles += 1
     }
     expect(c.io.enq.bits.product, r1 * r2)
+    step(1)
     println(s"Multiplying $r1 and $r2 took $cycles cycles")
   }
 }
