@@ -2,6 +2,7 @@
 package Stack
 
 import chisel3._
+import chisel3.util.log2Ceil
 
 /////////////////////////////////////////////////////////////////
 //
@@ -13,22 +14,22 @@ import chisel3._
 /////////////////////////////////////////////////////////////////
 
 class StackIn[T <: Data](gen: T) extends Bundle{
-  val read_enable  = Input(Bool)
-  val write_enable = Input(Bool)
-  val write_data   = Input(gen)
-  val flush        = Input(Bool)
+  val read_enable  = Input(Bool())
+  val write_enable = Input(Bool())
+  val write_data   = Input(gen.chiselCloneType)
+  val flush        = Input(Bool())
 }
 
 class StackOut[T <: Data](gen: T) extends Bundle{
-  val read_data = Output(gen)
-  val full      = Output(Bool)
-  val empty     = Output(Bool)
+  val read_data = Output(gen.chiselCloneType)
+  val full      = Output(Bool())
+  val empty     = Output(Bool())
 }
 
 class Stack[T <: Data](gen: T, val depth: Int) extends Module{
   val io = IO(new Bundle{
-    val in  = StackIn(gen)
-    val out = StackOut(gen)
+    val in  = new StackIn(gen)
+    val out = new StackOut(gen)
   })
 
   val stack_mem   = Mem(depth, gen)
@@ -58,7 +59,7 @@ class Stack[T <: Data](gen: T, val depth: Int) extends Module{
     }
   }
   .otherwise { // not empty
-    when(io.in.read_enable && io.in.write_data) {
+    when(io.in.read_enable && io.in.write_enable) {
       data_out := io.in.write_data  // pass through, not DRY
     }
     .elsewhen(io.in.read_enable) {
