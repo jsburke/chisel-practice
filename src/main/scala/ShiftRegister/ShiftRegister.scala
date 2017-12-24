@@ -25,7 +25,7 @@ class ShiftRegister(val reg_len: Int) extends Module {
   //  when the enable input is high
 
   when (io.enable){
-    val nextShiftReg = Cat(shiftReg(reg_len - 1, 1), io.new_lsb)  // concatenate the old shift reg with the new lsb, minus its msb
+    val nextShiftReg = Cat(shiftReg(reg_len - 1, 0), io.new_lsb)  // concatenate the old shift reg with the new lsb, minus its msb
     shiftReg        := nextShiftReg  // on every cycle, push in the new value
   }
 
@@ -33,3 +33,6 @@ class ShiftRegister(val reg_len: Int) extends Module {
   io.out := shiftReg
 }
 
+object ShiftRegisterVerilog extends App {
+  chisel3.Driver.execute(args, () => new ShiftRegister(16))
+}
