@@ -110,7 +110,7 @@ The OR based operators are based on `|` but I was having trouble with markdown.
 
 Continuing onto the next module:
 
-```
+```scala
 class Adder(val num_sz: Int) extends Module {  // Ripple-Carry Adder showing parameterization and using submodules
   val io = IO(new Bundle{
     val in1  = Input(UInt(num_sz.W))
