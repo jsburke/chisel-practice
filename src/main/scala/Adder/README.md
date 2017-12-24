@@ -4,7 +4,7 @@ This directory contains the Chisel HDL to make a Ripple-Carry Adder from individ
 
 ## How to Use
 
-The corresponding test code can be found in `src\test\scala\Adder\AdderUnitTest.scala`.  SBT is used to run the tests either by passing arguments to sbt:
+The corresponding test code can be found in [src/test/scala/Adder/AdderUnitTest.scala](../../../test/scala/Adder).  SBT is used to run the tests either by passing arguments to sbt:
 
 ```sh
 sbt 'testOnly Adder.AdderTester'
