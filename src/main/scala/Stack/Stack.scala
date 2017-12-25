@@ -63,12 +63,12 @@ class Stack[T <: Data](gen: T, val depth: Int) extends Module{
       data_out := io.in.write_data  // pass through, not DRY
     }
     .elsewhen(io.in.read_enable) {
-      data_out := stack_mem(p_stack)
+      data_out := stack_mem(p_stack - 1.U)
       stack_empty := (p_stack - 1.U) === 0.U
       p_stack     := p_stack - 1.U
       stack_full  := false.B  // can guarantee
     }
-    .elsewhen(io.in.write_enable) {
+    .elsewhen(io.in.write_enable && !stack_full) {
       stack_full         := (p_stack + 1.U) === UInt(depth)
       stack_mem(p_stack) := io.in.write_data
       p_stack            := p_stack + 1.U
