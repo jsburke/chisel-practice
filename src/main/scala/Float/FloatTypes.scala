@@ -37,8 +37,8 @@ trait FloatOptions {
   val negInf  = Bool()
 }
 
-trait HasSimpleOptions  extends FloatOptions with HasUnifiedNaN with HasUnifiedZero
-trait HasFancyOptions   extends FloatOptions with HasSplitNaN   with HasSplitZero
+trait HasSimpleOptions  extends FloatOptions with HasNaN with HasUnifiedZero
+trait HasFancyOptions   extends FloatOptions with HasNaN   with HasSplitZero
 
 class floatBase(exp_width: Int, mant_width: Int) extends Bundle {
   val sign     = Bool()
