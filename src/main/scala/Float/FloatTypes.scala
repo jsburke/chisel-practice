@@ -11,47 +11,54 @@ import chisel3.util.Cat
 //
 //////////////////////////////////////////////////////
 
-// options for Not-a-Number
+// Not-a-Number
 
-trait HasSplitNaN {
-  val sigNan = Reg(Bool())
-  val qNaN   = Reg(Bool())
-}
-
-trait HasUnifiedNaN {
-  val NaN    = Reg(Bool())
+trait HasNaN {
+  val NaN    = Bool()
 }
 
 // options for zero
 
 trait HasSplitZero {
-  val posZero = Reg(Bool())
-  val negZero = Reg(Bool())
+  val posZero = Bool()
+  val negZero = Bool()
 }
 
 trait HasUnifiedZero {
-  val zero    = Reg(Bool())
+  val zero    = Bool()
 }
 
 // options to extend floating point definitions
 
 trait FloatOptions {
-  val subNorm = Reg(Bool())
+  val subNorm = Bool()
 
-  val posInf  = Reg(Bool())
-  val negInf  = Reg(Bool())
+  val posInf  = Bool()
+  val negInf  = Bool()
 }
 
 trait HasSimpleOptions  extends FloatOptions with HasUnifiedNaN with HasUnifiedZero
 trait HasFancyOptions   extends FloatOptions with HasSplitNaN   with HasSplitZero
 
 class floatBase(exp_width: Int, mant_width: Int) extends Bundle {
-  val sign     = Reg(Bool())
-  val exponent = Reg(UInt(exp_width.W))
-  val mantissa = Reg(UInt(mant_width.W))
+  val sign     = Bool()
+  val exponent = UInt(exp_width.W)
+  val mantissa = UInt(mant_width.W)
+
+  override def cloneType = new floatBase(exp_width, mant_width).asInstanceOf[this.type]
 }
 
-class floatSimple(exp_width: Int, mant_width: Int) extends floatBase(exp_width, mant_width) with HasSimpleOptions
-class floatFancy(exp_width: Int, mant_width: Int)  extends floatBase(exp_width, mant_width) with HasFancyOptions
+class floatExtended(exp_width: Int, mant_width: Int) extends floatBase(exp_width, mant_width) {
+  // deal with zeros
+  def zero:    Bool = ~(exponent.orR | mantissa.orR)
+  def posZero: Bool = ~(sign | zero)
+  def negZero: Bool = ~(~sign | zero)
 
-
+  // deal with infinities
+  def inf: Bool     = exponent.andR & ~(mantissa.orR)
+  def posInf: Bool  = ~sign & inf
+  def negInf: Bool  = sign & inf
+ 
+  def NaN: Bool     = exponent.andR & mantissa.orR
+  def denorm: Bool  = ~(exponent.andR) & mantissa.orR
+}
