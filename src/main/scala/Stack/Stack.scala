@@ -16,12 +16,12 @@ import chisel3.util.log2Ceil
 class StackIn[T <: Data](gen: T) extends Bundle{
   val read_enable  = Input(Bool())
   val write_enable = Input(Bool())
-  val write_data   = Input(gen.chiselCloneType)
+  val write_data   = Input(chiselTypeOf(gen))
   val flush        = Input(Bool())
 }
 
 class StackOut[T <: Data](gen: T) extends Bundle{
-  val read_data = Output(gen.chiselCloneType)
+  val read_data = Output(chiselTypeOf(gen))
   val full      = Output(Bool())
   val empty     = Output(Bool())
 }
@@ -33,9 +33,9 @@ class Stack[T <: Data](gen: T, val depth: Int) extends Module{
   })
 
   val stack_mem   = Mem(depth, gen)
-  val p_stack     = Reg(init = UInt(0, depth)) // should make own class for inc, dec, max, etc other methods for ease
-  val stack_empty = Reg(init = Bool(true))
-  val stack_full  = Reg(init = Bool(false))
+  val p_stack     = RegInit(0.asUInt(depth.W)) // should make own class for inc, dec, max, etc other methods for ease
+  val stack_empty = RegInit(true.B)
+  val stack_full  = RegInit(false.B)
   val data_out    = Reg(gen)
 
   when(io.in.flush) {
@@ -69,7 +69,7 @@ class Stack[T <: Data](gen: T, val depth: Int) extends Module{
       stack_full  := false.B  // can guarantee
     }
     .elsewhen(io.in.write_enable && !stack_full) {
-      stack_full         := (p_stack + 1.U) === UInt(depth)
+      stack_full         := (p_stack + 1.U) === depth.asUInt
       stack_mem(p_stack) := io.in.write_data
       p_stack            := p_stack + 1.U
     }

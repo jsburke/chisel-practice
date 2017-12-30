@@ -40,8 +40,8 @@ class iterMul (val op_sz: Int) extends Module {
   })
 
   // declare state related stuff
-  val s_Ready :: s_Calc :: s_Done :: Nil = Enum(UInt(), 3)
-  val state = Reg(init = s_Ready)
+  val s_Ready :: s_Calc :: s_Done :: Nil = Enum(3)
+  val state = RegInit(s_Ready.asUInt)
 
   // default output states before switch to use last connect semantics
   io.deq.ready := false.B
