@@ -21,7 +21,7 @@ class AdderUnitTest(c: Adder) extends PeekPokeTester(c) { // often, like ijk in 
     expect(c.io.cout, rand_sum % 1)
   }
 }
-
+/*
 class AdderTester extends ChiselFlatSpec {
   val width = 16
 
@@ -71,15 +71,14 @@ class AdderTester extends ChiselFlatSpec {
     } should be (true)
   }
 }
+*/
 
-//  below is a less verbose adder tester
-//
-//class AdderTester extends ChiselFlatSpec {
-//  behavior of "Adder"
-//  backends foreach {backend =>
-//    it should s"correctly add randomly generated numbers $backend" in {
-//      Driver(() => new Adder(32))(c => new AdderUnitTest(c)) should be (true)
-//    }
-//  }
-//}
+class Tester extends ChiselFlatSpec {
+  behavior of "Adder"
+  backends foreach {backend =>
+    it should s"correctly add randomly generated numbers $backend" in {
+      Driver(() => new Adder(32))(c => new AdderUnitTest(c)) should be (true)
+    }
+  }
+}
 
