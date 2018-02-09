@@ -17,11 +17,10 @@ import chisel3.experimental._
 //
 /////////////////////////////////////////////////////////////
 
-class BlackBoxAdder extends BlackBox with HasBlackBoxResource {
+class simple_adder extends BlackBox {
   val io = IO(new Bundle{
     val in  = Input(UInt(128.W))  // concat of in1 an in2, no rhyme or reason
     val out = Output(UInt(64.W))
   })
 
-  setResource("/simple_adder.v")
 }
