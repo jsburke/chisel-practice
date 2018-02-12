@@ -17,7 +17,7 @@ class ShiftRegisterUnitTest(c: ShiftRegister) extends PeekPokeTester(c) {
 
   var prev   = 0
   val enable = 1
-  for (i <- 0 until 16){
+  for (i <- 0 until 100){
     val rand_lsb = rnd.nextInt(1)
     poke(c.io.enable, enable)
     poke(c.io.new_lsb, rand_lsb)
