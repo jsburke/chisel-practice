@@ -36,3 +36,7 @@ class ShiftRegisterTester extends ChiselFlatSpec {
     }
   }
 }
+
+object ShiftRegisterREPL extends App {
+  iotesters.Driver.executeFirrtlRepl(args, () => new ShiftRegister(8))
+}
