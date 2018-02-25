@@ -10,7 +10,7 @@ class KS_Adder (val width: Int, val useCarry: Boolean) extends Module {
     val b        = Input(UInt(width.W))
     val carryIn  = if (useCarry) Some(Input(UInt(1.W))) else None
     val sum      = Output(UInt(width.W))
-    val carryOut = if (useCarry) Some(Output(UInt(1.W))) else None
+    val carryOut = /*if (useCarry) Some(*/Output(UInt(1.W))/*) else None */
   })
 
   val carry_0 = io.carryIn.getOrElse(0.U)  // carry lsb is either input or hardwire zero
@@ -20,7 +20,8 @@ class KS_Adder (val width: Int, val useCarry: Boolean) extends Module {
   def propagate(i: Int): UInt = io.a(i) ^ io.b(i)
   def generate(i: Int):  UInt = io.a(i) & io.b(i)
 
-  // genMids derives the second to second-to-last terms in carries where i > 1
+  // genMids derives the second to second-to-last terms in carries where i >= 1
+  // (carry_1 really has no mids, so this returns an empty Seq to be reduced with the others in carry(i))
   def genMids(i: Int): Seq[UInt] = {
     require(i > 0, "genMids cannot be invoked with i <= 0")
 
@@ -35,6 +36,7 @@ class KS_Adder (val width: Int, val useCarry: Boolean) extends Module {
   midGuts(i, None)
   }
 
+  // genTail will produce the last term of a given carry i >= 0
   def genTail(i: Int): UInt = {
     require(i > 0, "genTail cannot be invoked with i <= 0")
     if(i == 1) propagate(0) & carry_0 // base case
@@ -47,5 +49,20 @@ class KS_Adder (val width: Int, val useCarry: Boolean) extends Module {
     else Seq(generate(i - 1)) ++ genMids(i) ++ Seq(genTail(i)) reduceLeft(_|_)
   }
 
+  // internal carry and sums signals
+  val intCarry = Wire(Vec(width + 1, UInt(1.W)))
+  val intSum   = Wire(Vec(width,     Bool()))
+
+  // carry lsb is special
+  intCarry(0)   := carry_0
+  intSum(0)     := io.a(0) ^ io.b(0) ^ carry_0
+
+  for(i <- 1 until width) {
+    intCarry(i) := carry(i)
+    intSum      := propagate(i) ^ intCarry(i - 1)
+  }
   
+  // drive outputs  
+  io.sum := intSum.asUInt
+  io.carryOut := carry(width + 1)
 }
