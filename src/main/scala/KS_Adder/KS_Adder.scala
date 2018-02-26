@@ -50,8 +50,8 @@ class KS_Adder (val width: Int, val useCarry: Boolean) extends Module {
   }
 
   // internal carry and sums signals
-  val intCarry = Wire(Vec(width + 1, UInt(1.W)))
-  val intSum   = Wire(Vec(width,     Bool()))
+  val intCarry = Wire(Vec(width, UInt(1.W)))
+  val intSum   = Wire(Vec(width, Bool()))
 
   // carry lsb is special
   intCarry(0)   := carry_0
@@ -59,10 +59,15 @@ class KS_Adder (val width: Int, val useCarry: Boolean) extends Module {
 
   for(i <- 1 until width) {
     intCarry(i) := carry(i)
-    intSum      := propagate(i) ^ intCarry(i - 1)
+    intSum(i)   := propagate(i) ^ intCarry(i - 1)
   }
   
   // drive outputs  
   io.sum := intSum.asUInt
-  io.carryOut := carry(width + 1)
+  io.carryOut := carry(width)
 }
+
+object verilog extends App {
+  chisel3.Driver.execute(args, () => new KS_Adder(32, false))
+}
+
