@@ -37,3 +37,7 @@ class Tester extends ChiselFlatSpec {
   }
 }
 
+object repl extends App {
+  iotesters.Driver.executeFirrtlRepl(args, () => new KS_Adder(8,false))
+}
+
