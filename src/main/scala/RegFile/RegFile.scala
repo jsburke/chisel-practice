@@ -3,6 +3,7 @@ package RegFile
 
 import chisel3._
 import chisel3.util._
+import chisel3.iotesters.Driver
 
 // Read and Write ports 
 // IO for the Register files
@@ -22,7 +23,7 @@ class RegFileWritePort (val addr_sz: Int,
   val addr = Input(UInt(addr_sz.W))
   val data = Input(UInt(data_sz.W))
 
-  override def cloneType = (new RegFileReadPort(addr_sz, data_sz)).asInstanceOf[this.type]
+  override def cloneType = (new RegFileWritePort(addr_sz, data_sz)).asInstanceOf[this.type]
 }
 
 // Base class to derive other RFs from
@@ -69,3 +70,8 @@ class RegisterFileBasic (reg_count:   Int,
 // manage writes.  Could block to $r0 if rv_zero to be super safe, but read stuff should handle it
   for(i <- 0 until write_ports) rf(io.write(i).addr) := io.write(i).data
 }
+
+object REPL extends App {
+  iotesters.Driver.executeFirrtlRepl(args, () => new RegisterFileBasic(32, 32, 2, 1, true))
+}
+
